@@ -1,5 +1,9 @@
 import Joi from "joi"
 import CustomHandler from "../services/CustomErrorHndler.js"
+
+import bcrypt from 'bcrypt'
+import User from "../modal/User.js"
+import jwtService from "../services/jwtService.js"
 export const register =async(req, res, next)=>{
     //cheklist
     //validate the request
@@ -31,5 +35,23 @@ export const register =async(req, res, next)=>{
     } catch (error) {
       next(error)
     }
-    res.json('hello from express')
+    //hashed password
+    const hashedPassword = await bcrypt.hash(req.body.password, 10)
+
+    //prepare model
+    const user = new User({
+        name:req.body.name,
+        email:req.body.email,
+        password:hashedPassword
+    })
+     let access_token
+    try {
+        const result=await user.save()
+        access_token= jwtService.sign({_id:result._id, role:result.role, })
+        
+    } catch (error) {
+       return next(error)
+    }
+
+    res.json({access_token:access_token})
 }

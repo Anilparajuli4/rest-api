@@ -1,5 +1,6 @@
 class CustomHandler extends Error {
     constructor(status, message){
+        super(),
      this.status = status;
      this.message = msg
     }
